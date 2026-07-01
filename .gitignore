@@ -1,0 +1,27 @@
+# Node.js
+node_modules/
+.env
+auth_info/
+
+# Flutter-specific paths (since it is a subdirectory)
+whatsapp_controller/.dart_tool/
+whatsapp_controller/.idea/
+whatsapp_controller/build/
+whatsapp_controller/android/local.properties
+whatsapp_controller/ios/Flutter/Generated.xcconfig
+whatsapp_controller/ios/Flutter/flutter_export_environment.sh
+whatsapp_controller/*.iml
+whatsapp_controller/android/*.iml
+whatsapp_controller/.flutter-plugins
+whatsapp_controller/.flutter-plugins-dependencies
+whatsapp_controller/.pub-cache/
+whatsapp_controller/.pub/
+whatsapp_controller/app.*.symbols
+whatsapp_controller/app.*.map.json
+whatsapp_controller/android/app/debug
+whatsapp_controller/android/app/profile
+whatsapp_controller/android/app/release
+
+# OS Files
+.DS_Store
+Thumbs.db
