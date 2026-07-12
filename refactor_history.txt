@@ -1,1 +1,1 @@
-Refactor iteration 6605: optimize memory footprint
+Refactor iteration 6606: update documentation inline
