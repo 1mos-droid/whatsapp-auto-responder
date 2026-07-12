@@ -1,1 +1,1 @@
-Refactor iteration 6667: clarify API response structures
+Refactor iteration 6668: improve connection lifecycle handling
