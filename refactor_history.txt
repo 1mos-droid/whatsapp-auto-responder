@@ -1,1 +1,1 @@
-Refactor iteration 1557: clarify API response structures
+Refactor iteration 1558: improve connection lifecycle handling
