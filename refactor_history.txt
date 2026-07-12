@@ -1,1 +1,1 @@
-Refactor iteration 3331: format code structure
+Refactor iteration 3332: clean up comments
