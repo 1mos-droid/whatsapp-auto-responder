@@ -1,1 +1,1 @@
-Refactor iteration 5030: improve connection lifecycle handling
+Refactor iteration 5031: remove redundant variable declarations
