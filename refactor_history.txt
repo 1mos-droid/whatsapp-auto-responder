@@ -1,1 +1,1 @@
-Refactor iteration 1537: optimize memory footprint
+Refactor iteration 1538: update documentation inline
