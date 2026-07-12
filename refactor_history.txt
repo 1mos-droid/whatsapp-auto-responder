@@ -1,1 +1,1 @@
-Refactor iteration 754: update documentation inline
+Refactor iteration 755: format code structure
