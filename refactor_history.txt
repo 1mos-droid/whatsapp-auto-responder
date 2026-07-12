@@ -1,1 +1,1 @@
-Refactor iteration 4060: clean up comments
+Refactor iteration 4061: verify environment variables configuration
