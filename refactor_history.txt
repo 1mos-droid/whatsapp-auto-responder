@@ -1,1 +1,1 @@
-Refactor iteration 2187: clarify API response structures
+Refactor iteration 2188: improve connection lifecycle handling
