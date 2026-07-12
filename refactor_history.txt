@@ -1,1 +1,1 @@
-Refactor iteration 1845: optimize memory footprint
+Refactor iteration 1846: update documentation inline
