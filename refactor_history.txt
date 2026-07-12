@@ -1,1 +1,1 @@
-Refactor iteration 4063: clarify API response structures
+Refactor iteration 4064: improve connection lifecycle handling
