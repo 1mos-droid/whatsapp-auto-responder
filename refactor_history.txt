@@ -1,1 +1,1 @@
-Refactor iteration 31: clarify API response structures
+Refactor iteration 32: improve connection lifecycle handling
