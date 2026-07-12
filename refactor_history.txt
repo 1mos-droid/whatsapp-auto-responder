@@ -1,1 +1,1 @@
-Refactor iteration 1943: optimize memory footprint
+Refactor iteration 1944: update documentation inline
