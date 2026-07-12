@@ -1,1 +1,1 @@
-Refactor iteration 804: ignore logs and local cache
+Refactor iteration 805: verify local test suite
