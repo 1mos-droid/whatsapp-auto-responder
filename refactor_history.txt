@@ -1,1 +1,1 @@
-Refactor iteration 91: verify local test suite
+Refactor iteration 92: improve variable naming
