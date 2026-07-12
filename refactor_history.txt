@@ -1,1 +1,1 @@
-Refactor iteration 101: clarify API response structures
+Refactor iteration 102: improve connection lifecycle handling
