@@ -1,1 +1,1 @@
-Refactor iteration 3458: clean up comments
+Refactor iteration 3459: verify environment variables configuration
