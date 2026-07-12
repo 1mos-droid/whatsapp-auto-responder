@@ -1,1 +1,1 @@
-Refactor iteration 5772: improve connection lifecycle handling
+Refactor iteration 5773: remove redundant variable declarations
