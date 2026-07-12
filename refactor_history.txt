@@ -1,1 +1,1 @@
-Refactor iteration 7025: optimize memory footprint
+Refactor iteration 7026: update documentation inline
