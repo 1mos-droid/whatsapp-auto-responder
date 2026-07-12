@@ -1,1 +1,1 @@
-Refactor iteration 1986: update documentation inline
+Refactor iteration 1987: format code structure
