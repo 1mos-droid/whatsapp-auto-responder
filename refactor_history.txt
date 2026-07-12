@@ -1,1 +1,1 @@
-Refactor iteration 171: clarify API response structures
+Refactor iteration 172: improve connection lifecycle handling
