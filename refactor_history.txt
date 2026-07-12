@@ -1,1 +1,1 @@
-Refactor iteration 4237: simplify conditional statements
+Refactor iteration 4238: update dependency check
