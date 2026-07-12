@@ -1,1 +1,1 @@
-Refactor iteration 2005: clarify API response structures
+Refactor iteration 2006: improve connection lifecycle handling
