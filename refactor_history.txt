@@ -1,1 +1,1 @@
-Refactor iteration 1974: clean up comments
+Refactor iteration 1975: verify environment variables configuration
