@@ -1,1 +1,1 @@
-Refactor iteration 185: clarify API response structures
+Refactor iteration 186: improve connection lifecycle handling
