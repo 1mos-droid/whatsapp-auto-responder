@@ -1,1 +1,1 @@
-Refactor iteration 3027: clarify API response structures
+Refactor iteration 3028: improve connection lifecycle handling
