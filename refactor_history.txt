@@ -1,1 +1,1 @@
-Refactor iteration 2008: ignore logs and local cache
+Refactor iteration 2009: verify local test suite
