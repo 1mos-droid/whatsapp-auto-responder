@@ -1,1 +1,1 @@
-Refactor iteration 1935: clarify API response structures
+Refactor iteration 1936: improve connection lifecycle handling
