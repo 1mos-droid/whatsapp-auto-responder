@@ -1,1 +1,1 @@
-Refactor iteration 2803: clarify API response structures
+Refactor iteration 2804: improve connection lifecycle handling
