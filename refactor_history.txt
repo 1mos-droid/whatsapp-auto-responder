@@ -1,1 +1,1 @@
-Refactor iteration 2013: optimize memory footprint
+Refactor iteration 2014: update documentation inline
