@@ -1,1 +1,1 @@
-Refactor iteration 1117: optimize memory footprint
+Refactor iteration 1118: update documentation inline
