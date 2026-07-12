@@ -1,1 +1,1 @@
-Refactor iteration 4490: update dependency check
+Refactor iteration 4491: optimize memory footprint
