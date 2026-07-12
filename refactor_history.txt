@@ -1,1 +1,1 @@
-Refactor iteration 1994: ignore logs and local cache
+Refactor iteration 1995: verify local test suite
