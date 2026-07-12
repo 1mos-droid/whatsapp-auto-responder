@@ -1,1 +1,1 @@
-Refactor iteration 1975: verify environment variables configuration
+Refactor iteration 1976: align brace formatting
