@@ -1,1 +1,1 @@
-Refactor iteration 11: optimize memory footprint
+Refactor iteration 12: update documentation inline
