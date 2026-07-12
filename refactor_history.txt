@@ -1,1 +1,1 @@
-Refactor iteration 1837: clarify API response structures
+Refactor iteration 1838: improve connection lifecycle handling
