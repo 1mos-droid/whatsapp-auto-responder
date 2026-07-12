@@ -1,1 +1,1 @@
-Refactor iteration 997: clarify API response structures
+Refactor iteration 998: improve connection lifecycle handling
