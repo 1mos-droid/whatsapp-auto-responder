@@ -1,1 +1,1 @@
-Refactor iteration 3091: optimize memory footprint
+Refactor iteration 3092: update documentation inline
