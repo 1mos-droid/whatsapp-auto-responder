@@ -1,1 +1,1 @@
-Refactor iteration 1789: optimize memory footprint
+Refactor iteration 1790: update documentation inline
