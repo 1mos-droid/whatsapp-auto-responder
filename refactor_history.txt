@@ -1,1 +1,1 @@
-Refactor iteration 1313: optimize memory footprint
+Refactor iteration 1314: update documentation inline
