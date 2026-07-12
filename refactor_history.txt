@@ -1,1 +1,1 @@
-Refactor iteration 4036: improve connection lifecycle handling
+Refactor iteration 4037: remove redundant variable declarations
