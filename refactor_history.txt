@@ -1,1 +1,1 @@
-Refactor iteration 2024: improve variable naming
+Refactor iteration 2025: simplify conditional statements
