@@ -1,1 +1,1 @@
-Refactor iteration 2173: clarify API response structures
+Refactor iteration 2174: improve connection lifecycle handling
