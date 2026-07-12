@@ -1,1 +1,1 @@
-Refactor iteration 1982: improve variable naming
+Refactor iteration 1983: simplify conditional statements
