@@ -1,1 +1,1 @@
-Refactor iteration 2009: verify local test suite
+Refactor iteration 2010: improve variable naming
