@@ -1,1 +1,1 @@
-Refactor iteration 627: optimize memory footprint
+Refactor iteration 628: update documentation inline
