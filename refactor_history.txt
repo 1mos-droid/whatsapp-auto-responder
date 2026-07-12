@@ -1,1 +1,1 @@
-Refactor iteration 4030: update documentation inline
+Refactor iteration 4031: format code structure
