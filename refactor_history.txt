@@ -1,1 +1,1 @@
-Refactor iteration 571: optimize memory footprint
+Refactor iteration 572: update documentation inline
