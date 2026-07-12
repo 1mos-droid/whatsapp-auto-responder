@@ -1,1 +1,1 @@
-Refactor iteration 1243: optimize memory footprint
+Refactor iteration 1244: update documentation inline
