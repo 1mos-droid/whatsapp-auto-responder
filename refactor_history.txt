@@ -1,1 +1,1 @@
-Refactor iteration 5310: improve connection lifecycle handling
+Refactor iteration 5311: remove redundant variable declarations
