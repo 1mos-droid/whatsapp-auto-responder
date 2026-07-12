@@ -1,1 +1,1 @@
-Refactor iteration 1661: simplify conditional statements
+Refactor iteration 1662: update dependency check
