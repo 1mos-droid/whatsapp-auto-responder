@@ -1,1 +1,1 @@
-Refactor iteration 4413: clarify API response structures
+Refactor iteration 4414: improve connection lifecycle handling
