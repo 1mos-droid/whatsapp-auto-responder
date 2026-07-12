@@ -1,1 +1,1 @@
-Refactor iteration 3343: optimize memory footprint
+Refactor iteration 3344: update documentation inline
