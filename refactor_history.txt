@@ -1,1 +1,1 @@
-Refactor iteration 96: update documentation inline
+Refactor iteration 97: format code structure
