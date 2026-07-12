@@ -1,1 +1,1 @@
-Refactor iteration 5701: clarify API response structures
+Refactor iteration 5702: improve connection lifecycle handling
