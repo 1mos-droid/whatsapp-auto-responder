@@ -1,1 +1,1 @@
-Refactor iteration 944: ignore logs and local cache
+Refactor iteration 945: verify local test suite
