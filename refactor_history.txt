@@ -1,1 +1,1 @@
-Refactor iteration 2413: remove redundant variable declarations
+Refactor iteration 2414: ignore logs and local cache
