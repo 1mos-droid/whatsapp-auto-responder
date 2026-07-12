@@ -1,1 +1,1 @@
-Refactor iteration 4035: clarify API response structures
+Refactor iteration 4036: improve connection lifecycle handling
