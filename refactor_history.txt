@@ -1,1 +1,1 @@
-Refactor iteration 3713: clarify API response structures
+Refactor iteration 3714: improve connection lifecycle handling
