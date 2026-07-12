@@ -1,1 +1,1 @@
-Refactor iteration 227: clarify API response structures
+Refactor iteration 228: improve connection lifecycle handling
