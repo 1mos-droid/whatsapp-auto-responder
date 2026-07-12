@@ -1,0 +1,1 @@
+Refactor iteration 1: verify environment variables configuration
