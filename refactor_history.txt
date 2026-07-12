@@ -1,1 +1,1 @@
-Refactor iteration 806: improve variable naming
+Refactor iteration 807: simplify conditional statements
