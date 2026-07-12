@@ -1,1 +1,1 @@
-Refactor iteration 2021: remove redundant variable declarations
+Refactor iteration 2022: ignore logs and local cache
