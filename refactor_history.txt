@@ -1,1 +1,1 @@
-Refactor iteration 4841: optimize memory footprint
+Refactor iteration 4842: update documentation inline
