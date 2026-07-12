@@ -1,1 +1,1 @@
-Refactor iteration 2001: format code structure
+Refactor iteration 2002: clean up comments
