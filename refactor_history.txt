@@ -1,1 +1,1 @@
-Refactor iteration 5122: update documentation inline
+Refactor iteration 5123: format code structure
