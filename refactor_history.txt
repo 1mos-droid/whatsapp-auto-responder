@@ -1,1 +1,1 @@
-Refactor iteration 2881: optimize memory footprint
+Refactor iteration 2882: update documentation inline
