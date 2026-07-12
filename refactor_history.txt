@@ -1,1 +1,1 @@
-Refactor iteration 5849: optimize memory footprint
+Refactor iteration 5850: update documentation inline
