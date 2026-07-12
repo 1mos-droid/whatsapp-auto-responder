@@ -1,1 +1,1 @@
-Refactor iteration 3909: clarify API response structures
+Refactor iteration 3910: improve connection lifecycle handling
