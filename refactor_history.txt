@@ -1,1 +1,1 @@
-Refactor iteration 325: clarify API response structures
+Refactor iteration 326: improve connection lifecycle handling
