@@ -1,1 +1,1 @@
-Refactor iteration 3602: improve connection lifecycle handling
+Refactor iteration 3603: remove redundant variable declarations
