@@ -1,1 +1,1 @@
-Refactor iteration 1019: optimize memory footprint
+Refactor iteration 1020: update documentation inline
