@@ -1,1 +1,1 @@
-Refactor iteration 2572: update dependency check
+Refactor iteration 2573: optimize memory footprint
