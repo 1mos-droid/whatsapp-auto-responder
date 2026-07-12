@@ -1,1 +1,1 @@
-Refactor iteration 2629: optimize memory footprint
+Refactor iteration 2630: update documentation inline
