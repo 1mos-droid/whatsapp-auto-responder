@@ -1,1 +1,1 @@
-Refactor iteration 451: clarify API response structures
+Refactor iteration 452: improve connection lifecycle handling
