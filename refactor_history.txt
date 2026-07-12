@@ -1,1 +1,1 @@
-Refactor iteration 2503: optimize memory footprint
+Refactor iteration 2504: update documentation inline
