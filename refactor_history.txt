@@ -1,1 +1,1 @@
-Refactor iteration 3321: clarify API response structures
+Refactor iteration 3322: improve connection lifecycle handling
