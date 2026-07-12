@@ -1,1 +1,1 @@
-Refactor iteration 2025: simplify conditional statements
+Refactor iteration 2026: update dependency check
