@@ -1,1 +1,1 @@
-Refactor iteration 4085: optimize memory footprint
+Refactor iteration 4086: update documentation inline
