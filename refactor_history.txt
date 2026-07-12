@@ -1,1 +1,1 @@
-Refactor iteration 4001: optimize memory footprint
+Refactor iteration 4002: update documentation inline
