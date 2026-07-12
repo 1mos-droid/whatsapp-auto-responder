@@ -1,1 +1,1 @@
-Refactor iteration 4024: ignore logs and local cache
+Refactor iteration 4025: verify local test suite
