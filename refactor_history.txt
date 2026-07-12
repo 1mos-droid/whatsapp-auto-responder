@@ -1,1 +1,1 @@
-Refactor iteration 3181: clarify API response structures
+Refactor iteration 3182: improve connection lifecycle handling
