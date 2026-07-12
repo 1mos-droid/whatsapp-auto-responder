@@ -1,1 +1,1 @@
-Refactor iteration 4096: improve variable naming
+Refactor iteration 4097: simplify conditional statements
