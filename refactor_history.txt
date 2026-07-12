@@ -1,1 +1,1 @@
-Refactor iteration 2011: simplify conditional statements
+Refactor iteration 2012: update dependency check
