@@ -1,1 +1,1 @@
-Refactor iteration 4015: optimize memory footprint
+Refactor iteration 4016: update documentation inline
