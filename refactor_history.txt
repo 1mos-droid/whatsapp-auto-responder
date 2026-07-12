@@ -1,1 +1,1 @@
-Refactor iteration 2573: optimize memory footprint
+Refactor iteration 2574: update documentation inline
