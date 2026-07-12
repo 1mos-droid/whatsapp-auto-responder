@@ -1,1 +1,1 @@
-Refactor iteration 3503: clarify API response structures
+Refactor iteration 3504: improve connection lifecycle handling
