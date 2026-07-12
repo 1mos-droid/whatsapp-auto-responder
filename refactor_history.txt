@@ -1,1 +1,1 @@
-Refactor iteration 115: clarify API response structures
+Refactor iteration 116: improve connection lifecycle handling
