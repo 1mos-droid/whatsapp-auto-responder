@@ -1,1 +1,1 @@
-Refactor iteration 1450: improve variable naming
+Refactor iteration 1451: simplify conditional statements
