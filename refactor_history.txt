@@ -1,1 +1,1 @@
-Refactor iteration 1959: format code structure
+Refactor iteration 1960: clean up comments
