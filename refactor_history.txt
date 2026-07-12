@@ -1,1 +1,1 @@
-Refactor iteration 1: verify environment variables configuration
+Refactor iteration 2: align brace formatting
