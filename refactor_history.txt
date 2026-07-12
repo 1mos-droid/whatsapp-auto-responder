@@ -1,1 +1,1 @@
-Refactor iteration 3389: verify environment variables configuration
+Refactor iteration 3390: align brace formatting
