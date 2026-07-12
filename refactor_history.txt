@@ -1,1 +1,1 @@
-Refactor iteration 300: ignore logs and local cache
+Refactor iteration 301: verify local test suite
