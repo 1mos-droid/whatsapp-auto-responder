@@ -1,1 +1,1 @@
-Refactor iteration 81: optimize memory footprint
+Refactor iteration 82: update documentation inline
