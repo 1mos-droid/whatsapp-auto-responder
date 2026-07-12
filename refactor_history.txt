@@ -1,1 +1,1 @@
-Refactor iteration 443: simplify conditional statements
+Refactor iteration 444: update dependency check
