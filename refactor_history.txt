@@ -1,1 +1,1 @@
-Refactor iteration 1983: simplify conditional statements
+Refactor iteration 1984: update dependency check
