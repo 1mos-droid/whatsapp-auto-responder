@@ -1,1 +1,1 @@
-Refactor iteration 3638: update documentation inline
+Refactor iteration 3639: format code structure
