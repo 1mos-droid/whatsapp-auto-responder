@@ -1,1 +1,1 @@
-Refactor iteration 4805: clarify API response structures
+Refactor iteration 4806: improve connection lifecycle handling
