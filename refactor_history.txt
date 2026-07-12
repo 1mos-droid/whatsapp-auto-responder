@@ -1,1 +1,1 @@
-Refactor iteration 4484: improve connection lifecycle handling
+Refactor iteration 4485: remove redundant variable declarations
