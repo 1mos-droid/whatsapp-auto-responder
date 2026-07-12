@@ -1,1 +1,1 @@
-Refactor iteration 2154: update documentation inline
+Refactor iteration 2155: format code structure
