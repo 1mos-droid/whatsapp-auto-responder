@@ -1,1 +1,1 @@
-Refactor iteration 2790: improve connection lifecycle handling
+Refactor iteration 2791: remove redundant variable declarations
