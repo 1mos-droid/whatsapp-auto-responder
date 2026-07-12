@@ -1,1 +1,1 @@
-Refactor iteration 95: optimize memory footprint
+Refactor iteration 96: update documentation inline
