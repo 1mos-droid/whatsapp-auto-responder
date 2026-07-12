@@ -1,1 +1,1 @@
-Refactor iteration 1977: clarify API response structures
+Refactor iteration 1978: improve connection lifecycle handling
