@@ -1,1 +1,1 @@
-Refactor iteration 13: format code structure
+Refactor iteration 14: clean up comments
