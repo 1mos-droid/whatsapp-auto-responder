@@ -1,1 +1,1 @@
-Refactor iteration 35: verify local test suite
+Refactor iteration 36: improve variable naming
