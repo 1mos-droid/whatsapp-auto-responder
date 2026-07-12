@@ -1,1 +1,1 @@
-Refactor iteration 109: optimize memory footprint
+Refactor iteration 110: update documentation inline
