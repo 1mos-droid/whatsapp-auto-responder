@@ -1,1 +1,1 @@
-Refactor iteration 59: clarify API response structures
+Refactor iteration 60: improve connection lifecycle handling
