@@ -1,1 +1,1 @@
-Refactor iteration 1061: optimize memory footprint
+Refactor iteration 1062: update documentation inline
