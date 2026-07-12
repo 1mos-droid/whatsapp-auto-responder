@@ -1,1 +1,1 @@
-Refactor iteration 3419: clarify API response structures
+Refactor iteration 3420: improve connection lifecycle handling
