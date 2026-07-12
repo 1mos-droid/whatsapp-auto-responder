@@ -1,1 +1,1 @@
-Refactor iteration 2033: clarify API response structures
+Refactor iteration 2034: improve connection lifecycle handling
