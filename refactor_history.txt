@@ -1,1 +1,1 @@
-Refactor iteration 4931: clarify API response structures
+Refactor iteration 4932: improve connection lifecycle handling
