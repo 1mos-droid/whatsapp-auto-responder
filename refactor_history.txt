@@ -1,1 +1,1 @@
-Refactor iteration 3601: clarify API response structures
+Refactor iteration 3602: improve connection lifecycle handling
