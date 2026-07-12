@@ -1,1 +1,1 @@
-Refactor iteration 703: clarify API response structures
+Refactor iteration 704: improve connection lifecycle handling
