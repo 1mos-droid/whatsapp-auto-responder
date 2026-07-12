@@ -1,1 +1,1 @@
-Refactor iteration 157: clarify API response structures
+Refactor iteration 158: improve connection lifecycle handling
