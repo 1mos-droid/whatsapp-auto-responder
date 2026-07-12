@@ -1,1 +1,1 @@
-Refactor iteration 1879: clarify API response structures
+Refactor iteration 1880: improve connection lifecycle handling
