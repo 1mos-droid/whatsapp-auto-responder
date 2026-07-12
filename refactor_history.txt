@@ -1,1 +1,1 @@
-Refactor iteration 1049: format code structure
+Refactor iteration 1050: clean up comments
