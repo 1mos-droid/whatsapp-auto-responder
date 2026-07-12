@@ -1,1 +1,1 @@
-Refactor iteration 1067: clarify API response structures
+Refactor iteration 1068: improve connection lifecycle handling
