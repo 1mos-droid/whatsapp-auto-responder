@@ -1,1 +1,1 @@
-Refactor iteration 1803: optimize memory footprint
+Refactor iteration 1804: update documentation inline
