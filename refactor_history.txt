@@ -1,1 +1,1 @@
-Refactor iteration 3237: clarify API response structures
+Refactor iteration 3238: improve connection lifecycle handling
