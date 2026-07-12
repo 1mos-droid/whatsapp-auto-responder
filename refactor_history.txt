@@ -1,1 +1,1 @@
-Refactor iteration 1151: clarify API response structures
+Refactor iteration 1152: improve connection lifecycle handling
