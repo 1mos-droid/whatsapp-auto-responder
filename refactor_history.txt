@@ -1,1 +1,1 @@
-Refactor iteration 2845: clarify API response structures
+Refactor iteration 2846: improve connection lifecycle handling
