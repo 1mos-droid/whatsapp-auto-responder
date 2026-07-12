@@ -1,1 +1,1 @@
-Refactor iteration 1870: improve variable naming
+Refactor iteration 1871: simplify conditional statements
