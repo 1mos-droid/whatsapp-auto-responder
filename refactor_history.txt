@@ -1,1 +1,1 @@
-Refactor iteration 5309: clarify API response structures
+Refactor iteration 5310: improve connection lifecycle handling
