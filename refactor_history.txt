@@ -1,1 +1,1 @@
-Refactor iteration 1200: update dependency check
+Refactor iteration 1201: optimize memory footprint
