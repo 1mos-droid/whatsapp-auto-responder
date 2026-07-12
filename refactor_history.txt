@@ -1,1 +1,1 @@
-Refactor iteration 1100: improve variable naming
+Refactor iteration 1101: simplify conditional statements
