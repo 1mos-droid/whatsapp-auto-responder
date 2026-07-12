@@ -1,1 +1,1 @@
-Refactor iteration 6726: ignore logs and local cache
+Refactor iteration 6727: verify local test suite
