@@ -1,1 +1,1 @@
-Refactor iteration 199: clarify API response structures
+Refactor iteration 200: improve connection lifecycle handling
