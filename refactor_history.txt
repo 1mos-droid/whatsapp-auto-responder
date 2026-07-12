@@ -1,1 +1,1 @@
-Refactor iteration 1005: optimize memory footprint
+Refactor iteration 1006: update documentation inline
