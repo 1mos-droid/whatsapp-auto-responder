@@ -1,1 +1,1 @@
-Refactor iteration 1482: update documentation inline
+Refactor iteration 1483: format code structure
