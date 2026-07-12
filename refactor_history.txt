@@ -1,1 +1,1 @@
-Refactor iteration 5342: improve variable naming
+Refactor iteration 5343: simplify conditional statements
