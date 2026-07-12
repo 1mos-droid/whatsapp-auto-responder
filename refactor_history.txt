@@ -1,1 +1,1 @@
-Refactor iteration 2560: update documentation inline
+Refactor iteration 2561: format code structure
