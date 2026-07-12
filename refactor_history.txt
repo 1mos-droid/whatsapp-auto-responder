@@ -1,1 +1,1 @@
-Refactor iteration 1319: clarify API response structures
+Refactor iteration 1320: improve connection lifecycle handling
