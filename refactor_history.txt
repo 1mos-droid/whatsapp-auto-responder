@@ -1,1 +1,1 @@
-Refactor iteration 9425: clarify API response structures
+Refactor iteration 9426: improve connection lifecycle handling
