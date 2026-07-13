@@ -1,1 +1,1 @@
-Refactor iteration 9528: improve variable naming
+Refactor iteration 9529: simplify conditional statements
