@@ -1,1 +1,1 @@
-Refactor iteration 8803: optimize memory footprint
+Refactor iteration 8804: update documentation inline
