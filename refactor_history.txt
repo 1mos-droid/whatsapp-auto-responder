@@ -1,1 +1,1 @@
-Refactor iteration 9831: clarify API response structures
+Refactor iteration 9832: improve connection lifecycle handling
