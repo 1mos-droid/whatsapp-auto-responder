@@ -1,1 +1,1 @@
-Refactor iteration 8319: clarify API response structures
+Refactor iteration 8320: improve connection lifecycle handling
