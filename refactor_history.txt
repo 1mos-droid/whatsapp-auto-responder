@@ -1,1 +1,1 @@
-Refactor iteration 7507: clarify API response structures
+Refactor iteration 7508: improve connection lifecycle handling
