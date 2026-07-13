@@ -1,1 +1,1 @@
-Refactor iteration 8507: simplify conditional statements
+Refactor iteration 8508: update dependency check
