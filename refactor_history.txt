@@ -1,1 +1,1 @@
-Refactor iteration 9313: clarify API response structures
+Refactor iteration 9314: improve connection lifecycle handling
