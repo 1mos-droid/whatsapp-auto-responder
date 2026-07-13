@@ -1,1 +1,1 @@
-Refactor iteration 8306: improve connection lifecycle handling
+Refactor iteration 8307: remove redundant variable declarations
