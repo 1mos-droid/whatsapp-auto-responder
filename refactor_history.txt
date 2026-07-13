@@ -1,1 +1,1 @@
-Refactor iteration 8059: simplify conditional statements
+Refactor iteration 8060: update dependency check
