@@ -1,1 +1,1 @@
-Refactor iteration 7999: remove redundant variable declarations
+Refactor iteration 8000: ignore logs and local cache
