@@ -1,1 +1,1 @@
-Refactor iteration 8627: clarify API response structures
+Refactor iteration 8628: improve connection lifecycle handling
