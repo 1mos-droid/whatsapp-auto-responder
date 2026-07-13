@@ -1,1 +1,1 @@
-Refactor iteration 9999: clarify API response structures
+Refactor iteration 10000: improve connection lifecycle handling
