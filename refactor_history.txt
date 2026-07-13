@@ -1,1 +1,1 @@
-Refactor iteration 9005: clarify API response structures
+Refactor iteration 9006: improve connection lifecycle handling
