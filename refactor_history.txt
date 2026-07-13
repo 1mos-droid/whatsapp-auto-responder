@@ -1,1 +1,1 @@
-Refactor iteration 8011: clarify API response structures
+Refactor iteration 8012: improve connection lifecycle handling
