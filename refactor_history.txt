@@ -1,1 +1,1 @@
-Refactor iteration 8333: clarify API response structures
+Refactor iteration 8334: improve connection lifecycle handling
