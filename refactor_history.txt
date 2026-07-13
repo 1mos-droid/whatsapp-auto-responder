@@ -1,1 +1,1 @@
-Refactor iteration 8055: remove redundant variable declarations
+Refactor iteration 8056: ignore logs and local cache
