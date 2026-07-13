@@ -1,1 +1,1 @@
-Refactor iteration 8062: update documentation inline
+Refactor iteration 8063: format code structure
