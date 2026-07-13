@@ -1,1 +1,1 @@
-Refactor iteration 9341: clarify API response structures
+Refactor iteration 9342: improve connection lifecycle handling
