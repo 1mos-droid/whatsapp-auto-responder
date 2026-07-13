@@ -1,1 +1,1 @@
-Refactor iteration 8033: optimize memory footprint
+Refactor iteration 8034: update documentation inline
