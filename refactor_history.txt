@@ -1,1 +1,1 @@
-Refactor iteration 8039: clarify API response structures
+Refactor iteration 8040: improve connection lifecycle handling
