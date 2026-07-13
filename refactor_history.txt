@@ -1,1 +1,1 @@
-Refactor iteration 7079: simplify conditional statements
+Refactor iteration 7080: update dependency check
