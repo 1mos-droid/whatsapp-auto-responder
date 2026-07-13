@@ -1,1 +1,1 @@
-Refactor iteration 8087: simplify conditional statements
+Refactor iteration 8088: update dependency check
