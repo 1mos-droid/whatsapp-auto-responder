@@ -1,1 +1,1 @@
-Refactor iteration 9293: optimize memory footprint
+Refactor iteration 9294: update documentation inline
