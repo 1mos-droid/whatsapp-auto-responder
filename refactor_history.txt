@@ -1,1 +1,1 @@
-Refactor iteration 8081: clarify API response structures
+Refactor iteration 8082: improve connection lifecycle handling
