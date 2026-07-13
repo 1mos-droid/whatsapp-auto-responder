@@ -1,1 +1,1 @@
-Refactor iteration 7338: align brace formatting
+Refactor iteration 7339: clarify API response structures
