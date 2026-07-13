@@ -1,1 +1,1 @@
-Refactor iteration 9677: clarify API response structures
+Refactor iteration 9678: improve connection lifecycle handling
