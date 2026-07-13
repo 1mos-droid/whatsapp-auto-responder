@@ -1,1 +1,1 @@
-Refactor iteration 9013: optimize memory footprint
+Refactor iteration 9014: update documentation inline
