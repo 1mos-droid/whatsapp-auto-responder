@@ -1,1 +1,1 @@
-Refactor iteration 8036: clean up comments
+Refactor iteration 8037: verify environment variables configuration
