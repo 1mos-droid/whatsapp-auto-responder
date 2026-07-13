@@ -1,1 +1,1 @@
-Refactor iteration 9300: improve connection lifecycle handling
+Refactor iteration 9301: remove redundant variable declarations
