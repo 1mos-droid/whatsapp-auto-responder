@@ -1,1 +1,1 @@
-Refactor iteration 9047: clarify API response structures
+Refactor iteration 9048: improve connection lifecycle handling
