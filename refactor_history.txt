@@ -1,1 +1,1 @@
-Refactor iteration 9271: clarify API response structures
+Refactor iteration 9272: improve connection lifecycle handling
