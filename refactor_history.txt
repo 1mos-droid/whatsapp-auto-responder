@@ -1,1 +1,1 @@
-Refactor iteration 8056: ignore logs and local cache
+Refactor iteration 8057: verify local test suite
