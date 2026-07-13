@@ -1,1 +1,1 @@
-Refactor iteration 8075: optimize memory footprint
+Refactor iteration 8076: update documentation inline
