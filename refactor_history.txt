@@ -1,1 +1,1 @@
-Refactor iteration 8080: align brace formatting
+Refactor iteration 8081: clarify API response structures
