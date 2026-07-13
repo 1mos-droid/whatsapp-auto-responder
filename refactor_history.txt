@@ -1,1 +1,1 @@
-Refactor iteration 7781: optimize memory footprint
+Refactor iteration 7782: update documentation inline
