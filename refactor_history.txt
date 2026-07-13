@@ -1,1 +1,1 @@
-Refactor iteration 7923: format code structure
+Refactor iteration 7924: clean up comments
