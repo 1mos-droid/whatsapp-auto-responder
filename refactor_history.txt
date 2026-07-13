@@ -1,1 +1,1 @@
-Refactor iteration 9934: improve variable naming
+Refactor iteration 9935: simplify conditional statements
