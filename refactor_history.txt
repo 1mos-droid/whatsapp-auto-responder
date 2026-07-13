@@ -1,1 +1,1 @@
-Refactor iteration 8607: optimize memory footprint
+Refactor iteration 8608: update documentation inline
