@@ -1,1 +1,1 @@
-Refactor iteration 8048: update documentation inline
+Refactor iteration 8049: format code structure
