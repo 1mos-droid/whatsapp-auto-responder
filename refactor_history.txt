@@ -1,1 +1,1 @@
-Refactor iteration 8077: format code structure
+Refactor iteration 8078: clean up comments
