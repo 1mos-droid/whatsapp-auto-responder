@@ -28,16 +28,32 @@ class BotStatus {
 /// --- API SERVICE ---
 
 class ApiService {
-  /**
-   * NETWORK CONFIGURATION
-   * Your current machine's local IP is: 192.168.100.9
-   */
+  /// NETWORK CONFIGURATION
+  /// Your current machine's local IP is: 192.168.100.9
   final String baseUrl = "http://192.168.100.9:3000";
+
+  /// API KEY for authentication.
+  /// Make sure this matches the CONTROL_API_KEY in the server's .env file.
+  static const String apiKey = "whatsapp_control_secret_token_abc123";
+
+  /// Standard headers for POST/PUT requests
+  Map<String, String> get _headers => {
+    'Content-Type': 'application/json',
+    'x-api-key': apiKey,
+  };
+
+  /// Headers for GET or requests without JSON body
+  Map<String, String> get _getHeaders => {
+    'x-api-key': apiKey,
+  };
 
   /// GET /status: Fetches the current state of the WhatsApp bot
   Future<BotStatus> fetchStatus() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/status'));
+      final response = await http.get(
+        Uri.parse('$baseUrl/status'),
+        headers: _getHeaders,
+      );
 
       if (response.statusCode == 200) {
         return BotStatus.fromJson(jsonDecode(response.body));
@@ -55,7 +71,10 @@ class ApiService {
   /// Returns the new 'isActive' state
   Future<bool> toggleBot() async {
     try {
-      final response = await http.post(Uri.parse('$baseUrl/toggle'));
+      final response = await http.post(
+        Uri.parse('$baseUrl/toggle'),
+        headers: _getHeaders,
+      );
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -76,7 +95,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/prompt'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers,
         body: jsonEncode({'newPrompt': newPrompt}),
       );
 
@@ -98,7 +117,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/chats/add'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers,
         body: jsonEncode({'jid': jid}),
       );
 
@@ -120,7 +139,7 @@ class ApiService {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/chats/remove'),
-        headers: {'Content-Type': 'application/json'},
+        headers: _headers,
         body: jsonEncode({'jid': jid}),
       );
 

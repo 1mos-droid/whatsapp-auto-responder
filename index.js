@@ -12,27 +12,58 @@ const path = require('path');
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const CONFIG_PATH = path.join(__dirname, 'config.json');
 
-// ponytail: simplified configuration handling
+// In-memory config cache and allowed chats set for efficiency and race-condition prevention
+let cachedConfig = null;
+const allowedChatsSet = new Set();
+
 function getConfig() {
+    if (cachedConfig) return cachedConfig;
     try {
-        return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+        cachedConfig = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
     } catch {
-        return { isActive: false, systemPrompt: "You are a helpful assistant.", allowedChats: [] };
+        cachedConfig = { isActive: false, systemPrompt: "You are a helpful assistant.", allowedChats: [] };
     }
+    allowedChatsSet.clear();
+    if (cachedConfig.allowedChats) {
+        cachedConfig.allowedChats.forEach(jid => allowedChatsSet.add(jid));
+    }
+    return cachedConfig;
 }
 
 function saveConfig(config) {
-    try {
-        fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
-    } catch (error) {
-        console.error("Config save failed:", error.message);
+    cachedConfig = config;
+    allowedChatsSet.clear();
+    if (config.allowedChats) {
+        config.allowedChats.forEach(jid => allowedChatsSet.add(jid));
     }
+    // Write asynchronously to prevent blocking the event loop
+    fs.writeFile(CONFIG_PATH, JSON.stringify(config, null, 2), (err) => {
+        if (err) console.error("Config save failed:", err.message);
+    });
 }
+
+// Pre-load config on startup
+getConfig();
 
 // --- EXPRESS SERVER ---
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+// Authentication middleware using a shared secret from .env
+const API_KEY = process.env.CONTROL_API_KEY;
+const authenticateApiKey = (req, res, next) => {
+    if (!API_KEY) {
+        console.warn('[Warning] CONTROL_API_KEY is not defined in the environment. API is currently unprotected.');
+        return next();
+    }
+    if (req.header('x-api-key') !== API_KEY) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+    next();
+};
+
+app.use(authenticateApiKey);
 
 app.get('/status', (req, res) => res.json(getConfig()));
 
@@ -88,6 +119,8 @@ async function generateAIResponse(userMessage, systemPrompt) {
 // ponytail: replaced over-engineered reading/typing delay calculation with a simple random delay
 const getStealthDelay = () => Math.floor(Math.random() * 2000) + 1500;
 
+let reconnectDelay = 1000;
+
 // Main WhatsApp connection logic
 async function connectToWhatsApp() {
     const { state, saveCreds } = await useMultiFileAuthState('auth_info');
@@ -104,9 +137,15 @@ async function connectToWhatsApp() {
         const { connection, lastDisconnect, qr } = update;
         if (qr) qrcode.generate(qr, { small: true });
         if (connection === 'close') {
-            const shouldReconnect = lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut;
-            if (shouldReconnect) connectToWhatsApp();
+            const statusCode = lastDisconnect?.error?.output?.statusCode;
+            const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
+            if (shouldReconnect) {
+                console.log(`[Connection] Closed. Reconnecting in ${reconnectDelay}ms...`);
+                setTimeout(connectToWhatsApp, reconnectDelay);
+                reconnectDelay = Math.min(reconnectDelay * 2, 30000);
+            }
         } else if (connection === 'open') {
+            reconnectDelay = 1000; // reset on success
             console.log('WhatsApp connection open.');
         }
     });
@@ -123,9 +162,9 @@ async function connectToWhatsApp() {
         const senderJid = msg.key.remoteJid;
         const config = getConfig();
 
-        // ponytail: simplified bot active and whitelist checks
+        // Check if responder is active and if the sender is whitelisted using Set for O(1) lookups
         if (!config.isActive) return;
-        if (!config.allowedChats || config.allowedChats.length === 0 || !config.allowedChats.includes(senderJid)) {
+        if (!allowedChatsSet.has(senderJid)) {
             console.log(`[Filter] Ignored sender ${senderJid}`);
             return;
         }
