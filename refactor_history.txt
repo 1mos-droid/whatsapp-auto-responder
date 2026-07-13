@@ -1,1 +1,1 @@
-Refactor iteration 7395: clarify API response structures
+Refactor iteration 7396: improve connection lifecycle handling
