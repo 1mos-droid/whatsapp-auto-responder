@@ -1,1 +1,1 @@
-Refactor iteration 9719: clarify API response structures
+Refactor iteration 9720: improve connection lifecycle handling
