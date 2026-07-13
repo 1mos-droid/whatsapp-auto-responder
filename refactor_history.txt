@@ -1,1 +1,1 @@
-Refactor iteration 8028: ignore logs and local cache
+Refactor iteration 8029: verify local test suite
