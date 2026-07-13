@@ -1,1 +1,1 @@
-Refactor iteration 7521: clarify API response structures
+Refactor iteration 7522: improve connection lifecycle handling
