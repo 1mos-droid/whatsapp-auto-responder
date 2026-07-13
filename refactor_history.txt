@@ -1,1 +1,1 @@
-Refactor iteration 8907: clarify API response structures
+Refactor iteration 8908: improve connection lifecycle handling
