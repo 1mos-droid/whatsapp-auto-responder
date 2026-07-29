@@ -1,0 +1,259 @@
+diff --git a/index.js b/index.js
+index c24cd81..4bdf432 100644
+--- a/index.js
++++ b/index.js
+@@ -11,22 +11,37 @@ const path = require('path');
+ // Initialize Groq Client
+ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+ const CONFIG_PATH = path.join(__dirname, 'config.json');
++const MAX_INPUT_CHARS = 4000; // cap what we send to Groq per message (cost + latency control)
+ 
+-// ponytail: simplified configuration handling
+-function getConfig() {
++// --- CONFIG: in-memory cache + async writes ---
++// Previously every message and every API call did a synchronous disk read/write.
++// That blocks Node's single event loop thread. Now we read from disk once, keep
++// the config (and a derived whitelist Set) in memory, and persist writes async.
++let cachedConfig = null;
++let allowedSet = new Set();
++
++function loadConfigFromDisk() {
+     try {
+-        return JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
++        cachedConfig = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf8'));
+     } catch {
+-        return { isActive: false, systemPrompt: "You are a helpful assistant.", allowedChats: [] };
++        cachedConfig = { isActive: false, systemPrompt: "You are a helpful assistant.", allowedChats: [] };
+     }
++    allowedSet = new Set(cachedConfig.allowedChats || []);
++}
++
++function getConfig() {
++    if (!cachedConfig) loadConfigFromDisk();
++    return cachedConfig;
+ }
+ 
+ function saveConfig(config) {
+-    try {
+-        fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2));
+-    } catch (error) {
+-        console.error("Config save failed:", error.message);
+-    }
++    cachedConfig = config;
++    allowedSet = new Set(config.allowedChats || []);
++    // Async write: doesn't block the event loop. Request handlers below are fully
++    // synchronous up to this call, so there's no race between concurrent requests.
++    fs.writeFile(CONFIG_PATH, JSON.stringify(config, null, 2), (err) => {
++        if (err) console.error("Config save failed:", err.message);
++    });
+ }
+ 
+ // --- EXPRESS SERVER ---
+@@ -34,6 +49,17 @@ const app = express();
+ app.use(express.json());
+ app.use(cors());
+ 
++// Simple shared-secret auth. Without this, anyone on the same network can
++// toggle the bot, rewrite its prompt, or edit the whitelist with a bare curl call.
++const API_KEY = process.env.CONTROL_API_KEY;
++app.use((req, res, next) => {
++    if (!API_KEY) return next(); // no key configured: skip (dev convenience, not for prod)
++    if (req.header('x-api-key') !== API_KEY) {
++        return res.status(401).json({ error: 'Unauthorized' });
++    }
++    next();
++});
++
+ app.get('/status', (req, res) => res.json(getConfig()));
+ 
+ app.post('/toggle', (req, res) => {
+@@ -68,7 +94,6 @@ app.post('/chats/remove', (req, res) => {
+ 
+ app.listen(3000, '0.0.0.0', () => console.log('[API] Running on port 3000'));
+ 
+-// ponytail: direct AI response generation
+ async function generateAIResponse(userMessage, systemPrompt) {
+     try {
+         const completion = await groq.chat.completions.create({
+@@ -85,9 +110,22 @@ async function generateAIResponse(userMessage, systemPrompt) {
+     }
+ }
+ 
+-// ponytail: replaced over-engineered reading/typing delay calculation with a simple random delay
+ const getStealthDelay = () => Math.floor(Math.random() * 2000) + 1500;
+ 
++// --- PER-CHAT MESSAGE QUEUE ---
++// If a contact fires off two or three messages in quick succession, each one
++// used to kick off its own independent async chain (Groq call -> delay -> send).
++// Those chains could finish out of order or overlap mid-send. This serializes
++// replies per JID so a chat's messages are always answered one at a time, in order.
++const chatQueues = new Map();
++
++function enqueue(jid, task) {
++    const prev = chatQueues.get(jid) || Promise.resolve();
++    const next = prev.then(task).catch(err => console.error(`[Queue:${jid}]`, err.message));
++    chatQueues.set(jid, next);
++    return next;
++}
++
+ // Main WhatsApp connection logic
+ async function connectToWhatsApp() {
+     const { state, saveCreds } = await useMultiFileAuthState('auth_info');
+@@ -100,13 +138,24 @@ async function connectToWhatsApp() {
+         logger: pino({ level: 'silent' }),
+     });
+ 
++    let reconnectDelay = 1000; // exponential backoff, capped at 30s
++
+     sock.ev.on('connection.update', (update) => {
+         const { connection, lastDisconnect, qr } = update;
+         if (qr) qrcode.generate(qr, { small: true });
+         if (connection === 'close') {
+-            const shouldReconnect = lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut;
+-            if (shouldReconnect) connectToWhatsApp();
++            // lastDisconnect itself can be undefined (Baileys types it as optional) —
++            // accessing .error on it directly was a live crash risk.
++            const statusCode = lastDisconnect?.error?.output?.statusCode;
++            const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
++            if (shouldReconnect) {
++                setTimeout(connectToWhatsApp, reconnectDelay);
++                reconnectDelay = Math.min(reconnectDelay * 2, 30000);
++            } else {
++                console.log('Logged out. Not reconnecting.');
++            }
+         } else if (connection === 'open') {
++            reconnectDelay = 1000; // reset backoff after a healthy connection
+             console.log('WhatsApp connection open.');
+         }
+     });
+@@ -123,20 +172,25 @@ async function connectToWhatsApp() {
+         const senderJid = msg.key.remoteJid;
+         const config = getConfig();
+ 
+-        // ponytail: simplified bot active and whitelist checks
+         if (!config.isActive) return;
+-        if (!config.allowedChats || config.allowedChats.length === 0 || !config.allowedChats.includes(senderJid)) {
++        if (allowedSet.size === 0 || !allowedSet.has(senderJid)) {
+             console.log(`[Filter] Ignored sender ${senderJid}`);
+             return;
+         }
+ 
+-        const aiResponse = await generateAIResponse(incomingText, config.systemPrompt);
+-        const delay = getStealthDelay();
++        const trimmedText = incomingText.length > MAX_INPUT_CHARS
++            ? incomingText.slice(0, MAX_INPUT_CHARS)
++            : incomingText;
+ 
+-        await sock.sendPresenceUpdate('composing', senderJid);
+-        await new Promise(resolve => setTimeout(resolve, delay));
+-        await sock.sendMessage(senderJid, { text: aiResponse }, { quoted: msg });
+-        await sock.sendPresenceUpdate('paused', senderJid);
++        enqueue(senderJid, async () => {
++            const aiResponse = await generateAIResponse(trimmedText, config.systemPrompt);
++            const delay = getStealthDelay();
++
++            await sock.sendPresenceUpdate('composing', senderJid);
++            await new Promise(resolve => setTimeout(resolve, delay));
++            await sock.sendMessage(senderJid, { text: aiResponse }, { quoted: msg });
++            await sock.sendPresenceUpdate('paused', senderJid);
++        });
+     });
+ }
+ 
+diff --git a/whatsapp_controller/lib/api_service.dart b/whatsapp_controller/lib/api_service.dart
+index 432db5a..60568a5 100644
+--- a/whatsapp_controller/lib/api_service.dart
++++ b/whatsapp_controller/lib/api_service.dart
+@@ -31,13 +31,23 @@ class ApiService {
+   /**
+    * NETWORK CONFIGURATION
+    * Your current machine's local IP is: 192.168.100.9
++   * Must match CONTROL_API_KEY in the backend's .env file.
+    */
+   final String baseUrl = "http://192.168.100.9:3000";
++  final String apiKey = "REPLACE_WITH_YOUR_CONTROL_API_KEY";
++  static const _timeout = Duration(seconds: 10);
++
++  Map<String, String> get _headers => {
++        'Content-Type': 'application/json',
++        'x-api-key': apiKey,
++      };
+ 
+   /// GET /status: Fetches the current state of the WhatsApp bot
+   Future<BotStatus> fetchStatus() async {
+     try {
+-      final response = await http.get(Uri.parse('$baseUrl/status'));
++      final response = await http
++          .get(Uri.parse('$baseUrl/status'), headers: _headers)
++          .timeout(_timeout);
+ 
+       if (response.statusCode == 200) {
+         return BotStatus.fromJson(jsonDecode(response.body));
+@@ -55,7 +65,9 @@ class ApiService {
+   /// Returns the new 'isActive' state
+   Future<bool> toggleBot() async {
+     try {
+-      final response = await http.post(Uri.parse('$baseUrl/toggle'));
++      final response = await http
++          .post(Uri.parse('$baseUrl/toggle'), headers: _headers)
++          .timeout(_timeout);
+ 
+       if (response.statusCode == 200) {
+         final data = jsonDecode(response.body);
+@@ -74,11 +86,13 @@ class ApiService {
+   /// Returns true if the update was successful
+   Future<bool> updatePrompt(String newPrompt) async {
+     try {
+-      final response = await http.post(
+-        Uri.parse('$baseUrl/prompt'),
+-        headers: {'Content-Type': 'application/json'},
+-        body: jsonEncode({'newPrompt': newPrompt}),
+-      );
++      final response = await http
++          .post(
++            Uri.parse('$baseUrl/prompt'),
++            headers: _headers,
++            body: jsonEncode({'newPrompt': newPrompt}),
++          )
++          .timeout(_timeout);
+ 
+       if (response.statusCode == 200) {
+         final data = jsonDecode(response.body);
+@@ -96,11 +110,13 @@ class ApiService {
+   /// POST /chats/add: Adds a JID to the whitelist
+   Future<List<String>> addChat(String jid) async {
+     try {
+-      final response = await http.post(
+-        Uri.parse('$baseUrl/chats/add'),
+-        headers: {'Content-Type': 'application/json'},
+-        body: jsonEncode({'jid': jid}),
+-      );
++      final response = await http
++          .post(
++            Uri.parse('$baseUrl/chats/add'),
++            headers: _headers,
++            body: jsonEncode({'jid': jid}),
++          )
++          .timeout(_timeout);
+ 
+       if (response.statusCode == 200) {
+         final data = jsonDecode(response.body);
+@@ -118,11 +134,13 @@ class ApiService {
+   /// POST /chats/remove: Removes a JID from the whitelist
+   Future<List<String>> removeChat(String jid) async {
+     try {
+-      final response = await http.post(
+-        Uri.parse('$baseUrl/chats/remove'),
+-        headers: {'Content-Type': 'application/json'},
+-        body: jsonEncode({'jid': jid}),
+-      );
++      final response = await http
++          .post(
++            Uri.parse('$baseUrl/chats/remove'),
++            headers: _headers,
++            body: jsonEncode({'jid': jid}),
++          )
++          .timeout(_timeout);
+ 
+       if (response.statusCode == 200) {
+         final data = jsonDecode(response.body);
