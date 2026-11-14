@@ -76,7 +76,7 @@ The dashboard refreshes every 20 seconds and supports manual refresh. Unsaved pr
 - Configuration changes are validated, serialized, written to a private temporary file, flushed, and atomically renamed before success is returned. Failed saves keep the previous in-memory settings. Invalid existing configuration fails startup with a repair instruction; it is never silently replaced. Missing configuration starts paused with no allowed chats.
 - Connections retry with exponential backoff up to 30 seconds. Logout, replacement by another session, invalid credentials, and forbidden sessions require operator attention instead of an endless reconnect loop. Termination signals cancel reconnects and pending sends.
 
-`config.json` stores your settings and survives restarts. Back it up along with your session, and do not edit it while the server is running. It was tracked in the original repository: `.gitignore` does not untrack existing files, so avoid committing private prompts or chat IDs. Counters and duplicate suppression are in memory and reset on restart. Conversation history is not stored or sent to Groq; each reply uses the current instructions and incoming text only.
+`config.json` stores your settings and survives restarts. Back it up along with your session, and do not edit it while the server is running. Runtime settings are excluded from Git; keep private prompts and chat IDs in this local file. A fresh checkout starts paused with no allowed chats and creates the file when settings are saved. Counters and duplicate suppression are in memory and reset on restart. Conversation history is not stored or sent to Groq; each reply uses the current instructions and incoming text only.
 
 ## Control API
 

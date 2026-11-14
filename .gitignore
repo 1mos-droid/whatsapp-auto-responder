@@ -32,3 +32,18 @@ Thumbs.db
 config.json
 config.json.*.tmp
 coverage/
+
+# Local cloud credentials, signing material, logs, and distributable artifacts
+.aws/
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+key.properties
+service-account*.json
+*serviceAccount*.json
+*.apk
+*.aab
+*.hprof
+*.log
