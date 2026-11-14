@@ -1,17 +1,15 @@
-# whatsapp_controller
+# Responder Control
 
-A new Flutter project.
+Flutter dashboard for the WhatsApp Auto Responder backend. See the [project setup and API documentation](../README.md) for installation, connection settings, supported chat IDs, and operational limits.
 
-## Getting Started
+```sh
+flutter pub get
+flutter run
+```
 
-This project is a starting point for a Flutter application.
+Use **Connection settings** to enter the backend URL and control API key for this session. Personal builds can also use `--dart-define=CONTROL_API_URL=...` and `--dart-define=CONTROL_API_KEY=...`. Never distribute a build containing your private key. Android development builds support local HTTP; release builds require HTTPS.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```sh
+flutter analyze
+flutter test
+```

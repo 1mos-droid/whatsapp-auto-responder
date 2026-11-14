@@ -1,264 +1,487 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'api_service.dart';
 
-void main() {
-  runApp(const StealthApp());
-}
+void main() => runApp(const StealthApp());
 
 class StealthApp extends StatelessWidget {
-  const StealthApp({super.key});
+  final ApiService? apiService;
+  const StealthApp({super.key, this.apiService});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Stealth Responder',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF0F172A),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF10B981),
-          surface: Color(0xFF1E293B),
-        ),
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'Responder Control',
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(
+      brightness: Brightness.dark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFF38D9A9),
+        brightness: Brightness.dark,
       ),
-      home: const CyberDashboard(),
-    );
-  }
+      scaffoldBackgroundColor: const Color(0xFF0D151C),
+      inputDecorationTheme: const InputDecorationTheme(
+        border: OutlineInputBorder(),
+      ),
+      useMaterial3: true,
+    ),
+    home: CyberDashboard(apiService: apiService),
+  );
 }
 
-// ponytail: replaced over-engineered CyberBackground animation and GlassCard with a simple, standard dashboard UI
 class CyberDashboard extends StatefulWidget {
-  const CyberDashboard({super.key});
+  final ApiService? apiService;
+  const CyberDashboard({super.key, this.apiService});
 
   @override
   State<CyberDashboard> createState() => _CyberDashboardState();
 }
 
 class _CyberDashboardState extends State<CyberDashboard> {
-  final ApiService _apiService = ApiService();
-  final TextEditingController _promptController = TextEditingController();
-  final TextEditingController _jidController = TextEditingController();
-  
-  bool _isLoading = true;
-  bool _isActive = false;
-  List<String> _allowedChats = [];
-  String _errorMessage = '';
+  late ApiService _api;
+  late bool _ownsApi;
+  final _prompt = TextEditingController();
+  final _jid = TextEditingController();
+  BotStatus? _status;
+  String _savedPrompt = '';
+  String? _error;
+  bool _loading = true;
+  bool _busy = false;
+  bool _settingsOpen = false;
+  Timer? _poll;
+
+  bool get _locked => _loading || _busy || _settingsOpen;
 
   @override
   void initState() {
     super.initState();
-    _loadStatus();
+    _api = widget.apiService ?? ApiService();
+    _ownsApi = widget.apiService == null;
+    _prompt.addListener(_promptChanged);
+    _load();
+    _poll = Timer.periodic(const Duration(seconds: 20), (_) {
+      if (!_locked) _load(background: true);
+    });
+  }
+
+  void _promptChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
-    _promptController.dispose();
-    _jidController.dispose();
+    _poll?.cancel();
+    _prompt.removeListener(_promptChanged);
+    _prompt.dispose();
+    _jid.dispose();
+    if (_ownsApi) _api.close();
     super.dispose();
   }
 
-  Future<void> _loadStatus() async {
-    setState(() { _isLoading = true; _errorMessage = ''; });
+  Future<void> _load({bool background = false}) async {
+    if (!mounted || _busy || _settingsOpen) return;
+    setState(() {
+      _loading = true;
+      if (!background) _error = null;
+    });
     try {
-      final status = await _apiService.fetchStatus();
+      final status = await _api.fetchStatus();
+      if (!mounted) return;
+      final dirty = _prompt.text != _savedPrompt;
       setState(() {
-        _isActive = status.isActive;
-        _promptController.text = status.systemPrompt;
-        _allowedChats = status.allowedChats;
-        _isLoading = false;
+        _status = status;
+        if (!dirty) _prompt.text = status.systemPrompt;
+        _savedPrompt = status.systemPrompt;
+        _error = null;
       });
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
-        _isLoading = false;
-      });
+    } catch (error) {
+      if (mounted) setState(() => _error = error.toString());
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
-  Future<void> _toggleBot() async {
-    setState(() => _isActive = !_isActive);
+  Future<void> _change(Future<void> Function() action, String success) async {
+    if (_locked) return;
+    setState(() => _busy = true);
     try {
-      final newState = await _apiService.toggleBot();
-      setState(() => _isActive = newState);
-      _showToast(_isActive ? 'Bot Enabled' : 'Bot Disabled');
-    } catch (e) {
-      setState(() => _isActive = !_isActive);
-      _showToast('Network error');
+      await action();
+      if (!mounted) return;
+      _toast(success);
+    } catch (error) {
+      if (mounted) {
+        setState(() => _error = error.toString());
+        _toast(error.toString());
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
     }
+    if (mounted) await _load(background: true);
   }
 
-  Future<void> _updatePrompt() async {
-    final newPrompt = _promptController.text.trim();
-    if (newPrompt.isEmpty) return;
-    try {
-      final success = await _apiService.updatePrompt(newPrompt);
-      if (success) _showToast('Prompt updated');
-    } catch (e) {
-      _showToast('Failed to update prompt');
-    }
+  void _toast(String message) {
+    ScaffoldMessenger.of(context)
+      ..clearSnackBars()
+      ..showSnackBar(SnackBar(content: Text(message)));
   }
 
-  Future<void> _addChat() async {
-    final jid = _jidController.text.trim();
-    if (jid.isEmpty) return;
-    try {
-      final newList = await _apiService.addChat(jid);
-      setState(() {
-        _allowedChats = newList;
-        _jidController.clear();
-      });
-      _showToast('Chat added');
-    } catch (e) {
-      _showToast('Failed to add chat');
-    }
-  }
-
-  Future<void> _removeChat(String jid) async {
-    try {
-      final newList = await _apiService.removeChat(jid);
-      setState(() => _allowedChats = newList);
-      _showToast('Chat removed');
-    } catch (e) {
-      _showToast('Failed to remove chat');
-    }
-  }
-
-  void _showToast(String message) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+  Future<void> _settings() async {
+    if (_locked) return;
+    setState(() => _settingsOpen = true);
+    final result = await showDialog<(String, String)>(
+      context: context,
+      builder: (context) =>
+          _ConnectionDialog(baseUrl: _api.baseUrl, apiKey: _api.apiKey),
     );
+    if (!mounted) return;
+    setState(() => _settingsOpen = false);
+    if (result == null) return;
+    if (_ownsApi) _api.close();
+    _api = ApiService(baseUrl: result.$1, apiKey: result.$2);
+    _ownsApi = true;
+    setState(() {
+      _status = null;
+      _savedPrompt = '';
+      _prompt.clear();
+    });
+    await _load();
   }
+
+  Widget _card(String title, String subtitle, Widget child) => Card(
+    margin: const EdgeInsets.only(bottom: 20),
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+          ),
+          const SizedBox(height: 20),
+          child,
+        ],
+      ),
+    ),
+  );
+
+  String get _connectionLabel => switch (_status?.connection) {
+    'open' => 'WhatsApp connected',
+    'awaiting_qr' => 'Scan the QR code in the server terminal',
+    'logged_out' => 'WhatsApp logged out · relink on the server',
+    'action_required' => 'WhatsApp session needs attention on the server',
+    'connecting' || 'reconnecting' => 'Connecting to WhatsApp…',
+    _ => 'WhatsApp connection unavailable',
+  };
 
   @override
   Widget build(BuildContext context) {
+    final status = _status;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Stealth Responder Control'),
+        title: const Text('Responder Control'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.sync),
-            onPressed: _loadStatus,
+            tooltip: 'Refresh status',
+            onPressed: _locked ? null : _load,
+            icon: const Icon(Icons.refresh),
+          ),
+          IconButton(
+            tooltip: 'Connection settings',
+            onPressed: _locked ? null : _settings,
+            icon: const Icon(Icons.settings_outlined),
           ),
         ],
       ),
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator())
-        : _errorMessage.isNotEmpty 
-          ? _buildErrorState() 
-          : _buildMainDashboard(),
-    );
-  }
-
-  Widget _buildErrorState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(_errorMessage, textAlign: TextAlign.center),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _loadStatus,
-              child: const Text('Retry'),
-            )
-          ],
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            if (!_locked) await _load();
+          },
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(20),
+            children: [
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 840),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        'Your conversations. Your rules.',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Control who receives replies and how your assistant responds.',
+                      ),
+                      const SizedBox(height: 24),
+                      if (_loading || _busy)
+                        const LinearProgressIndicator(
+                          semanticsLabel: 'Contacting server',
+                        ),
+                      if (_error != null) ...[
+                        const SizedBox(height: 16),
+                        MaterialBanner(
+                          content: Text(_error!),
+                          leading: const Icon(Icons.cloud_off_outlined),
+                          actions: [
+                            TextButton(
+                              onPressed: _locked ? null : _load,
+                              child: const Text('Retry'),
+                            ),
+                            TextButton(
+                              onPressed: _locked ? null : _settings,
+                              child: const Text('Connection settings'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      if (status != null) ...[
+                        _card(
+                          'Responder',
+                          _connectionLabel,
+                          Column(
+                            children: [
+                              SwitchListTile.adaptive(
+                                contentPadding: EdgeInsets.zero,
+                                title: Text(
+                                  status.isActive
+                                      ? 'Replies enabled'
+                                      : 'Replies paused',
+                                ),
+                                subtitle: const Text(
+                                  'Only allowed chats receive replies while WhatsApp is connected.',
+                                ),
+                                value: status.isActive,
+                                onChanged: _locked || _error != null
+                                    ? null
+                                    : (value) => _change(
+                                        () async {
+                                          await _api.setActive(value);
+                                        },
+                                        value
+                                            ? 'Replies enabled'
+                                            : 'Replies paused',
+                                      ),
+                              ),
+                              const Divider(),
+                              Wrap(
+                                spacing: 24,
+                                runSpacing: 8,
+                                children: [
+                                  Text('${status.sent} sent'),
+                                  Text('${status.pending} pending'),
+                                  Text('${status.failed} failed'),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        _card(
+                          'Allowed chats',
+                          'Add a full WhatsApp chat ID. An empty list means nobody receives automated replies.',
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              TextField(
+                                controller: _jid,
+                                autocorrect: false,
+                                enabled: !_locked,
+                                decoration: const InputDecoration(
+                                  labelText: 'WhatsApp chat ID',
+                                  hintText: '15551234567@s.whatsapp.net',
+                                  helperText:
+                                      'Contacts: @s.whatsapp.net or @lid · Groups: @g.us',
+                                  helperMaxLines: 2,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: FilledButton.icon(
+                                  onPressed: _locked
+                                      ? null
+                                      : () {
+                                          final jid = _jid.text.trim();
+                                          if (!RegExp(
+                                            r'^(?:[1-9]\d{4,19}@s\.whatsapp\.net|[1-9]\d{4,19}(?:-\d{1,20})?@g\.us|[1-9]\d{4,19}@lid)$',
+                                          ).hasMatch(jid)) {
+                                            _toast(
+                                              'Enter a valid WhatsApp chat ID.',
+                                            );
+                                            return;
+                                          }
+                                          _change(() async {
+                                            await _api.addChat(jid);
+                                            if (mounted) _jid.clear();
+                                          }, 'Chat added');
+                                        },
+                                  icon: const Icon(Icons.add),
+                                  label: const Text('Add chat'),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              if (status.allowedChats.isEmpty)
+                                const Text('No chats allowed yet.'),
+                              for (final jid in status.allowedChats)
+                                ListTile(
+                                  contentPadding: EdgeInsets.zero,
+                                  leading: const Icon(
+                                    Icons.chat_bubble_outline,
+                                  ),
+                                  title: Text(jid),
+                                  trailing: IconButton(
+                                    tooltip: 'Remove $jid',
+                                    onPressed: _locked
+                                        ? null
+                                        : () => _change(() async {
+                                            await _api.removeChat(jid);
+                                          }, 'Chat removed'),
+                                    icon: const Icon(Icons.close),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        _card(
+                          'Reply instructions',
+                          'Describe the tone, purpose, and boundaries for your assistant.',
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              TextField(
+                                controller: _prompt,
+                                enabled: !_busy,
+                                minLines: 4,
+                                maxLines: 12,
+                                maxLength: 8000,
+                                decoration: const InputDecoration(
+                                  labelText: 'System prompt',
+                                  alignLabelWithHint: true,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: FilledButton.icon(
+                                  onPressed:
+                                      _locked ||
+                                          _prompt.text.trim().isEmpty ||
+                                          _prompt.text == _savedPrompt
+                                      ? null
+                                      : () {
+                                          final prompt = _prompt.text.trim();
+                                          _change(() async {
+                                            final saved = await _api
+                                                .updatePrompt(prompt);
+                                            if (mounted) {
+                                              setState(() {
+                                                _savedPrompt = saved;
+                                                _prompt.text = saved;
+                                              });
+                                            }
+                                          }, 'Instructions saved');
+                                        },
+                                  icon: const Icon(Icons.save_outlined),
+                                  label: Text(
+                                    _prompt.text == _savedPrompt
+                                        ? 'Instructions saved'
+                                        : 'Save instructions',
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildMainDashboard() {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        // Status Card
-        // ponytail: replaced over-engineered pulse with standard SwitchListTile
-        Card(
-          child: SwitchListTile(
-            title: const Text('Responder Active'),
-            subtitle: Text(_isActive ? 'Monitoring chats' : 'Disabled'),
-            value: _isActive,
-            onChanged: (val) => _toggleBot(),
-          ),
-        ),
-        const SizedBox(height: 16),
+class _ConnectionDialog extends StatefulWidget {
+  final String baseUrl;
+  final String apiKey;
+  const _ConnectionDialog({required this.baseUrl, required this.apiKey});
+  @override
+  State<_ConnectionDialog> createState() => _ConnectionDialogState();
+}
 
-        // Whitelist Manager
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Allowed Chats Whitelist', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _jidController,
-                        decoration: const InputDecoration(
-                          hintText: 'Enter JID (e.g. 1234@s.whatsapp.net)',
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: _addChat,
-                      child: const Icon(Icons.add),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                if (_allowedChats.isEmpty)
-                  const Text('No chats whitelisted. Bot will not reply to anyone.')
-                else
-                  Wrap(
-                    spacing: 8,
-                    children: _allowedChats.map((jid) {
-                      return Chip(
-                        label: Text(jid),
-                        onDeleted: () => _removeChat(jid),
-                      );
-                    }).toList(),
-                  ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // Prompt Editor
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('System Prompt', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _promptController,
-                  maxLines: 4,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    hintText: 'System directives...',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                ElevatedButton(
-                  onPressed: _updatePrompt,
-                  child: const Text('Update Prompt'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
+class _ConnectionDialogState extends State<_ConnectionDialog> {
+  late final TextEditingController address;
+  late final TextEditingController key;
+  @override
+  void initState() {
+    super.initState();
+    address = TextEditingController(text: widget.baseUrl);
+    key = TextEditingController(text: widget.apiKey);
   }
+
+  @override
+  void dispose() {
+    address.dispose();
+    key.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Connect to your server'),
+    content: SizedBox(
+      width: 440,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Use the address reachable from this device. Connection settings entered here last for this session.',
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: address,
+              keyboardType: TextInputType.url,
+              autocorrect: false,
+              decoration: const InputDecoration(
+                labelText: 'Server address',
+                hintText: 'https://responder.example.com',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: key,
+              obscureText: true,
+              autocorrect: false,
+              enableSuggestions: false,
+              decoration: const InputDecoration(labelText: 'Control API key'),
+            ),
+          ],
+        ),
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Cancel'),
+      ),
+      FilledButton(
+        onPressed: () =>
+            Navigator.pop(context, (address.text.trim(), key.text.trim())),
+        child: const Text('Connect'),
+      ),
+    ],
+  );
 }
