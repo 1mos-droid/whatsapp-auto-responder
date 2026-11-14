@@ -12,3 +12,10 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# Kotlin build session cache
+/.kotlin/
+
+# JVM crash diagnostics can be large and contain private runtime data.
+*.hprof
+hs_err_pid*.log

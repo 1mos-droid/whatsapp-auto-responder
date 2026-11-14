@@ -1,7 +1,9 @@
 # Node.js
 node_modules/
 .env
-auth_info/
+.env.*
+!.env.example
+auth_info*/
 
 # Flutter-specific paths (since it is a subdirectory)
 whatsapp_controller/.dart_tool/
@@ -25,3 +27,8 @@ whatsapp_controller/android/app/release
 # OS Files
 .DS_Store
 Thumbs.db
+
+# Private runtime settings and temporary atomic saves
+config.json
+config.json.*.tmp
+coverage/

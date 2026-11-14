@@ -167,10 +167,10 @@ index 432db5a..60568a5 100644
 @@ -31,13 +31,23 @@ class ApiService {
    /**
     * NETWORK CONFIGURATION
-    * Your current machine's local IP is: 192.168.100.9
+    * Your current machine's local IP is: 127.0.0.1
 +   * Must match CONTROL_API_KEY in the backend's .env file.
     */
-   final String baseUrl = "http://192.168.100.9:3000";
+   final String baseUrl = "http://127.0.0.1:3000";
 +  final String apiKey = "REPLACE_WITH_YOUR_CONTROL_API_KEY";
 +  static const _timeout = Duration(seconds: 10);
 +

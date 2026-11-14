@@ -1,158 +1,153 @@
+import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:http/http.dart' as http;
 
-/// --- DATA MODEL ---
+class ApiException implements Exception {
+  final String message;
+  const ApiException(this.message);
+  @override
+  String toString() => message;
+}
 
 class BotStatus {
   final bool isActive;
   final String systemPrompt;
   final List<String> allowedChats;
+  final String connection;
+  final int sent;
+  final int failed;
+  final int pending;
 
-  BotStatus({
+  const BotStatus({
     required this.isActive,
     required this.systemPrompt,
     required this.allowedChats,
+    this.connection = 'unknown',
+    this.sent = 0,
+    this.failed = 0,
+    this.pending = 0,
   });
 
-  /// Factory to create a BotStatus from JSON map
   factory BotStatus.fromJson(Map<String, dynamic> json) {
+    final runtime = json['runtime'] as Map<String, dynamic>? ?? {};
     return BotStatus(
-      isActive: json['isActive'] ?? false,
-      systemPrompt: json['systemPrompt'] ?? '',
-      allowedChats: List<String>.from(json['allowedChats'] ?? []),
+      isActive: json['isActive'] as bool,
+      systemPrompt: json['systemPrompt'] as String,
+      allowedChats: List<String>.from(json['allowedChats'] as List),
+      connection: runtime['connection'] as String? ?? 'unknown',
+      sent: runtime['sent'] as int? ?? 0,
+      failed: runtime['failed'] as int? ?? 0,
+      pending: runtime['pending'] as int? ?? 0,
     );
   }
 }
 
-/// --- API SERVICE ---
-
 class ApiService {
-  /// NETWORK CONFIGURATION
-  /// Your current machine's local IP is: 192.168.100.9
-  final String baseUrl = "http://192.168.100.9:3000";
+  final String baseUrl;
+  final String apiKey;
+  final http.Client _client;
+  final Duration timeout;
 
-  /// API KEY for authentication.
-  /// Make sure this matches the CONTROL_API_KEY in the server's .env file.
-  static const String apiKey = "whatsapp_control_secret_token_abc123";
+  ApiService({
+    String baseUrl = const String.fromEnvironment(
+      'CONTROL_API_URL',
+      defaultValue: 'http://127.0.0.1:3000',
+    ),
+    this.apiKey = const String.fromEnvironment('CONTROL_API_KEY'),
+    http.Client? client,
+    this.timeout = const Duration(seconds: 12),
+  }) : baseUrl = baseUrl.replaceFirst(RegExp(r'/+$'), ''),
+       _client = client ?? http.Client();
 
-  /// Standard headers for POST/PUT requests
-  Map<String, String> get _headers => {
-    'Content-Type': 'application/json',
-    'x-api-key': apiKey,
-  };
+  Future<Map<String, dynamic>> _request(
+    String endpoint, [
+    Map<String, dynamic>? body,
+  ]) async {
+    if (apiKey.trim().isEmpty) {
+      throw const ApiException(
+        'Set your server address and control API key to connect.',
+      );
+    }
+    final uri = Uri.tryParse(baseUrl);
+    if (uri == null ||
+        !['http', 'https'].contains(uri.scheme) ||
+        uri.host.isEmpty ||
+        uri.hasQuery ||
+        uri.hasFragment ||
+        uri.userInfo.isNotEmpty) {
+      throw const ApiException('Enter a valid HTTP or HTTPS server address.');
+    }
+    try {
+      final headers = {'Content-Type': 'application/json', 'x-api-key': apiKey};
+      final target = Uri.parse('$baseUrl$endpoint');
+      final response =
+          await (body == null
+                  ? _client.get(target, headers: headers)
+                  : _client.post(
+                      target,
+                      headers: headers,
+                      body: jsonEncode(body),
+                    ))
+              .timeout(timeout);
+      if (response.statusCode == 401) {
+        throw const ApiException('Access denied. Check your control API key.');
+      }
+      final decoded = jsonDecode(response.body);
+      if (decoded is! Map<String, dynamic>) {
+        throw const FormatException('Expected JSON object');
+      }
+      if (response.statusCode != 200) {
+        throw ApiException(
+          decoded['error'] is String
+              ? decoded['error'] as String
+              : 'Server request failed (${response.statusCode}).',
+        );
+      }
+      return decoded;
+    } on TimeoutException {
+      throw const ApiException(
+        'The server took too long to respond. Refresh to check whether your change was saved.',
+      );
+    } on http.ClientException {
+      throw const ApiException(
+        'Cannot reach the server. Check its address, network, and whether it is running.',
+      );
+    } on FormatException {
+      throw const ApiException(
+        'The server returned an invalid response. Check the server address.',
+      );
+    }
+  }
 
-  /// Headers for GET or requests without JSON body
-  Map<String, String> get _getHeaders => {
-    'x-api-key': apiKey,
-  };
-
-  /// GET /status: Fetches the current state of the WhatsApp bot
   Future<BotStatus> fetchStatus() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/status'),
-        headers: _getHeaders,
+      return BotStatus.fromJson(await _request('/status'));
+    } on TypeError {
+      throw const ApiException(
+        'The server returned an incompatible status response.',
       );
-
-      if (response.statusCode == 200) {
-        return BotStatus.fromJson(jsonDecode(response.body));
-      } else {
-        throw Exception('Server returned status code: ${response.statusCode}');
-      }
-    } on SocketException {
-      throw Exception('Cannot connect to the local server. Is it running?');
-    } catch (e) {
-      throw Exception('Failed to fetch bot status: $e');
     }
   }
 
-  /// POST /toggle: Flips the bot's active status
-  /// Returns the new 'isActive' state
-  Future<bool> toggleBot() async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/toggle'),
-        headers: _getHeaders,
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['isActive'] ?? false;
-      } else {
-        throw Exception('Toggle failed with status: ${response.statusCode}');
-      }
-    } on SocketException {
-      throw Exception('Cannot connect to the local server.');
-    } catch (e) {
-      throw Exception('Failed to toggle bot: $e');
-    }
+  Future<bool> setActive(bool isActive) async {
+    final data = await _request('/toggle', {'isActive': isActive});
+    return data['isActive'] as bool;
   }
 
-  /// POST /prompt: Updates the bot's system instructions
-  /// Returns true if the update was successful
-  Future<bool> updatePrompt(String newPrompt) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/prompt'),
-        headers: _headers,
-        body: jsonEncode({'newPrompt': newPrompt}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data['success'] == true;
-      } else {
-        throw Exception('Prompt update failed: ${response.statusCode}');
-      }
-    } on SocketException {
-      throw Exception('Cannot connect to the local server.');
-    } catch (e) {
-      throw Exception('Failed to update prompt: $e');
-    }
+  Future<String> updatePrompt(String newPrompt) async {
+    final data = await _request('/prompt', {'newPrompt': newPrompt});
+    return data['systemPrompt'] as String;
   }
 
-  /// POST /chats/add: Adds a JID to the whitelist
   Future<List<String>> addChat(String jid) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/chats/add'),
-        headers: _headers,
-        body: jsonEncode({'jid': jid}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return List<String>.from(data['allowedChats'] ?? []);
-      } else {
-        throw Exception('Failed to add chat: ${response.statusCode}');
-      }
-    } on SocketException {
-      throw Exception('Cannot connect to the local server.');
-    } catch (e) {
-      throw Exception('Failed to add chat: $e');
-    }
+    final data = await _request('/chats/add', {'jid': jid});
+    return List<String>.from(data['allowedChats'] as List);
   }
 
-  /// POST /chats/remove: Removes a JID from the whitelist
   Future<List<String>> removeChat(String jid) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/chats/remove'),
-        headers: _headers,
-        body: jsonEncode({'jid': jid}),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return List<String>.from(data['allowedChats'] ?? []);
-      } else {
-        throw Exception('Failed to remove chat: ${response.statusCode}');
-      }
-    } on SocketException {
-      throw Exception('Cannot connect to the local server.');
-    } catch (e) {
-      throw Exception('Failed to remove chat: $e');
-    }
+    final data = await _request('/chats/remove', {'jid': jid});
+    return List<String>.from(data['allowedChats'] as List);
   }
+
+  void close() => _client.close();
 }
